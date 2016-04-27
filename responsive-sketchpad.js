@@ -316,10 +316,10 @@
 	 * other sketchpads or stored on a server
 	 */
 	Sketchpad.prototype.toJSON = function () {
-		var canvasSize = this.getCanvasSize();
+		//var canvasSize = this.getCanvasSize();
 		return {
 			version: 1,
-			aspectRatio: canvasSize.width / canvasSize.height,
+			aspectRatio: this.canvas.width / this.canvas.height,
 			strokes: this.strokes
 		};
 	};
@@ -330,7 +330,9 @@
 	 * @return {object} - JSON object to load
 	 */
 	Sketchpad.prototype.loadJSON = function (data) {
+		data = JSON.parse(data);
 		this.strokes = data.strokes;
+		this.redraw();
 	};
 
 
