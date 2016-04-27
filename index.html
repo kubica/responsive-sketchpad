@@ -1,235 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Responsive Sketchpad</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="name" content="Responsive Sketchpad">
-    <meta name="description" content="A completely responsive HTML5 canvas sketchpad">
-    <meta name="keywords" content="html5,html 5,html5 javascript, responsive, canvas, mobile, sketchpad, sketch, drawing">
-    <meta name="author" content="Theisen Sanders">
+	<meta charset="utf-8">
+	<title>Responsive Sketchpad</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="name" content="Responsive Sketchpad">
+	<meta name="description" content="A completely responsive HTML5 canvas sketchpad">
+	<meta name="keywords" content="html5,html 5,html5 javascript, responsive, canvas, mobile, sketchpad, sketch, drawing">
+	<meta name="author" content="Theisen Sanders">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
-    <link href="./assets/material.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <link href="./assets/prism.min.css" rel="stylesheet">
+	<style>
+		body {
+			background: #eee;
+		}
+		.btn-tool {
+			margin-right: 10px;
+		}
 
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		#sketchpad canvas {
+			background-color: #fff;
 
-      ga('create', 'UA-33670860-4', 'auto');
-      ga('send', 'pageview');
-    </script>
-
-    <style>
-        body {
-            margin-top: 0;
-            margin-bottom: 0;
-            background-color: #EFEFEF;
-        }
-
-        .header {
-            background-color: #EFEFEF;
-            height: 250px;
-            text-align: center;
-        }
-
-        .header h1 {
-            padding-top: 30px;
-            font-size: 70px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .header h4 {
-            margin: 0;
-        }
-
-        .header .mdl-button {
-            margin-top: 20px;
-            padding: 5px 20px;
-        }
-
-        .header .mdl-button.github {
-            margin-right: 20px;
-        }
-
-        .header .mdl-button i {
-            margin-right: 5px;
-        }
-
-        .sketchpad-slider {
-            margin: 10px -25px;
-        }
-
-        #sketchpad canvas {
-            background-color: #fff;
-
-            /* .mdl-shadow--4dp */
-            box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
-        }
-
-        .toolbox pre {
-            margin-top: 8px;
-            margin-bottom: -20px;
-        }
-
-        .toolbox .tool {
-            margin: 30px 0;
-        }
-
-        .toolbox .tool .mdl-button {
-            margin-bottom: 10px;
-        }
-    </style>
+			/* .mdl-shadow--4dp */
+			box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
+		}
+	</style>
 
 </head>
 
 <body>
-<div class="header">
-    <h1>Responsive Sketchpad</h1>
-    <h4>A completely responsive, HTML5 canvas sketchpad for use on desktop and mobile browsers</h4>
 
-    <a class="github mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-        href="https://github.com/trsanders/responsive-sketchpad">
-        <i class="material-icons">&#xE86F;</i> View on Github
-    </a>
-    <a class="download mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-        href="https://github.com/trsanders/responsive-sketchpad/zipball/master">
-        <i class="material-icons">&#xE2C0;</i> Download Source
-    </a>
-</div>
-
-<div class="content">
-    <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--6-col">
-            <div class="sketchpad-slider">
-                <input class="mdl-slider mdl-js-slider" type="range"
-                    min="0" max="100" value="100" tabindex="0" id="slider" />
-            </div>
-            <div id="sketchpad"></div>
-        </div>
-        <div class="mdl-cell mdl-cell--6-col">
-            <div class="toolbox">
-                <pre><- Draw a picture and then resize me!</pre>
-
-                <div class="tool">
-<pre class="mdl-shadow--2dp"><code class="language-javascript">var Sketchpad = require('responsive-sketchpad');
-
-var el = document.getElementById('sketchpad');
-var pad = new Sketchpad(el, {
-    line: {
-        color: '#f44335',
-        size: 5
-    }
-});</code></pre>
-                </div>
-
-                <div class="tool">
-                    <button class="mdl-button mdl-js-button mdl-button--raised" onclick="setLineColor()">
-                        <i class="material-icons" id="line-color-icon">&#xE22B;</i> Line Color
-                    </button>
-                    <pre class="mdl-shadow--2dp"><code class="language-javascript">pad.setLineColor('#000000');</code></pre>
-                </div>
-
-                <div class="tool">
-                    <button class="mdl-button mdl-js-button mdl-button--raised" onclick="setLineSize()">
-                        <i class="material-icons">&#xE39E;</i> Line Size
-                    </button>
-                    <pre class="mdl-shadow--2dp"><code class="language-javascript">pad.setLineSize(20);</code></pre>
-                </div>
-
-                <div class="tool">
-                    <button class="mdl-button mdl-js-button mdl-button--raised" onclick="undo()">
-                        <i class="material-icons">&#xE166;</i> Undo
-                    </button>
-                    <button class="mdl-button mdl-js-button mdl-button--raised" onclick="redo()">
-                        <i class="material-icons">&#xE15A;</i> Redo
-                    </button>
-                    <pre class="mdl-shadow--2dp"><code class="language-javascript">pad.undo();
-pad.redo();</code></pre>
-                </div>
-
-                <div class="tool">
-                    <button class="mdl-button mdl-js-button mdl-button--raised" id="drawLineBtn">
-                        <i class="material-icons">&#xE15B;</i> Draw Line
-                    </button>
-                    <pre class="mdl-shadow--2dp"><code class="language-javascript">pad.drawLine({x: 10, y: 15}, {x: 33, y: 45}, {color: 'red'});</code></pre>
-                </div>
-
-                <div class="tool">
-                    <button class="mdl-button mdl-js-button mdl-button--raised" onclick="doClear()">
-                        <i class="material-icons">&#xE14C;</i> Clear
-                    </button>
-                    <pre class="mdl-shadow--2dp"><code class="language-javascript">pad.clear();</code></pre>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container">
+	<h1 style="text-align: center; margin-bottom: 35px;">Responsive Sketchpad</h1>
+	<div class="row">
+		<div class="col-xs-12" style="margin-bottom: 15px;">
+			<button class="btn btn-primary btn-tool" onclick="undo()">
+				Undo
+			</button>
+			<button class="btn btn-primary btn-tool" onclick="redo()">
+				Redo
+			</button>
+			<button class="btn btn-primary btn-tool" onclick="doClear()">
+				Clear
+			</button>
+		</div>
+		<div id="sketchpad" style="width: 100%; margin: 0 auto;"></div>
+	</div>
  </div>
 
-<script src="assets/material.min.js"></script>
-<script src="assets/prism.min.js"></script>
 <script data-cfasync="false" src="responsive-sketchpad.js"></script>
 
 <script data-cfasync="false">
-    var el = document.getElementById('sketchpad');
-    var pad = new Sketchpad(el);
-    var originalWidth = pad.opts.width;
+	var el = document.getElementById('sketchpad');
+	var pad = new Sketchpad(el);
+	var originalWidth = pad.opts.width;
 
-    function getRandomNumber(low, high) {
-        return Math.floor(Math.random() * (high - low)) + low;
-    }
+	function undo() {
+		pad.undo();
+	}
 
-    function setLineColor() {
-        var colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
-                      '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50',
-                      '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800',
-                      '#FF5722', '#795548', '#9E9E9E', '#607D8B', '#000000'];
-        var color = colors[Math.floor(Math.random() * colors.length)];
-        pad.setLineColor(color);  // Set sketchpad color
-        document.getElementById('line-color-icon').style.color = color;  // Set icon color
-    }
+	function redo() {
+		pad.redo();
+	}
 
-    function setLineSize() {
-        var size = Math.floor(Math.random() * 18) + 2;
-        pad.setLineSize(size);
-    }
+	function doClear() {
+		pad.clear();
+	}
 
-    function undo() {
-        pad.undo();
-    }
+	function resize() {
+		//var value = e.target.value;
+		//var newWidth = originalWidth * (value / 100);
+		var width = document.getElementById('sketchpad').offsetWidth;
+		pad.resize(width-20);
+	}
 
-    function redo() {
-        pad.redo();
-    }
-
-    function doClear() {
-        pad.clear();
-    }
-
-    function resize(e) {
-        var value = e.target.value;
-        var newWidth = originalWidth * (value / 100);
-        pad.resize(newWidth);
-    }
-    document.getElementById('slider').addEventListener('change', resize);
-
-    function drawLine() {
-        var start = {
-            x: getRandomNumber(0, pad.opts.width),
-            y: getRandomNumber(0, pad.opts.height)
-        };
-        var end = {
-            x: getRandomNumber(0, pad.opts.width),
-            y: getRandomNumber(0, pad.opts.height)
-        };
-        pad.drawLine(start, end);
-    }
-    document.getElementById('drawLineBtn').addEventListener('click', drawLine);
+	window.addEventListener('resize', resize);
+	//document.getElementById('slider').addEventListener('change', resize);
 
 </script>
 
