@@ -61,6 +61,49 @@
 			canvas.style.padding = '0';
 			canvas.style.margin = 'auto';
 			canvas.style.display = 'block';
+			canvas.style.border = '1px solid #ddd';
+		}
+
+		function undo() {
+			that.undo();
+		}
+
+		function redo() {
+			that.redo();
+		}
+
+		function addToolbar () {
+			var toolbar = document.createElement('div');
+			toolbar.style.width = '100%';
+			toolbar.style.textAlign = 'center';
+			toolbar.style.marginBottom = '10px';
+			toolbar.appendChild(addButton('undo'));
+			toolbar.appendChild(addButton('redo'));
+			el.appendChild(toolbar);
+		}
+
+		/**
+			* Set button events
+			*/
+		function addButton (event) {
+
+			var button = document.createElement('button');
+
+			button.onclick = function() {
+				switch(event) {
+			    case "undo":
+		        undo();
+		        break;
+			    case "redo":
+		        redo();
+		        break;
+				}
+			}
+			button.setAttribute('class', 'btn btn-primary');
+			button.style.margin = '5px';
+			button.innerHTML = event;
+
+			return button;
 		}
 
 		/**
@@ -73,6 +116,7 @@
 			};
 		}
 
+		addToolbar();
 		setCanvasSize(opts.width, opts.height);
 		el.appendChild(canvas);
 		var context = canvas.getContext('2d');
