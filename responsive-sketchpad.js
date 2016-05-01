@@ -76,6 +76,10 @@
 			that.play();
 		}
 
+		function playAll() {
+			that.playAll();
+		}
+
 		function addToolbar () {
 			var toolbar = document.createElement('div');
 			toolbar.style.width = '100%';
@@ -84,6 +88,7 @@
 			toolbar.appendChild(addButton('undo'));
 			toolbar.appendChild(addButton('redo'));
 			toolbar.appendChild(addButton('play'));
+			toolbar.appendChild(addButton('playAll'));
 			el.appendChild(toolbar);
 		}
 
@@ -104,6 +109,9 @@
 		        break;
 		      case 'play':
 		      	play();
+		      	break;
+		      case 'playAll':
+		      	playAll();
 		      	break;
 				}
 			}
@@ -228,6 +236,55 @@
 		}
 
 		/**
+		 * Draw a stroke on the canvas
+		 */
+		function drawPointsInDetail (points, strokes) {
+		
+			var n = points.length - 1;	// 4 - 2,2
+			var j=0;
+
+			setInterval(function() {
+				if (j < n)
+				{
+					var t=0;
+					for(var s=0; s<strokes.length; s++)
+					{
+						// get current stroke
+						var stroke = strokes[s];
+						t += stroke.points.length;
+
+						if(j < t)
+						{
+							if(j+1 !== t)
+							{
+								context.beginPath();
+
+								var start = normalizePoint(points[j]);
+								var end = normalizePoint(points[j + 1]);
+
+								context.moveTo(start.x, start.y);
+								context.lineTo(end.x, end.y);
+
+								context.closePath();
+								context.strokeStyle = stroke.color;
+								context.lineWidth = normalizeLineSize(stroke.size);
+								context.lineJoin = stroke.join;
+								context.lineCap = stroke.cap;
+								context.miterLimit = stroke.miterLimit;
+
+								context.stroke();
+							}
+
+							break;
+						}					
+					}
+
+					j++;
+				}
+			}, 50);
+		}
+
+		/**
 		 * Redraw the canvas
 		 */
 		function redraw () {
@@ -236,6 +293,20 @@
 			for (var i = 0; i < that.strokes.length; i++) {
 				drawStroke(that.strokes[i]);
 			}
+		}
+
+		/**
+		 * Redraw the canvas
+		 */
+		function redraw_detail () {
+			clearCanvas();
+
+			var points = []; 
+			for (var i = 0; i < that.strokes.length; i++) {
+				points = points.concat(that.strokes[i].points);
+			}
+
+			drawPointsInDetail(points, that.strokes);
 		}
 
 		// On mouse down, create a new stroke with a start location
@@ -313,6 +384,7 @@
 
 		// Public functions
 		this.redraw = redraw;
+		this.redraw_detail = redraw_detail;
 		this.setCanvasSize = setCanvasSize;
 		this.getPointRelativeToCanvas = getPointRelativeToCanvas;
 		this.getLineSizeRelativeToCanvas = getLineSizeRelativeToCanvas;
@@ -336,21 +408,18 @@
 	 * Play for showing the draw process
 	 */
 	Sketchpad.prototype.play = function () {
-		// if (this.strokes.length === 0){
-		// 	return;
-		// }
 
 		while(this.strokes.length > 0)
 		{
-			console.log(this.strokes);
 			this.undos.push(this.strokes.pop());
 		}
 
 		var that = this;
 
 		var n = that.undos.length;
-		var i = 1;
+		var i = 0;
 		that.redo();
+
 		setInterval(function() {
 			if (i <= n)
 			{
@@ -358,14 +427,29 @@
 				i++;
 			} 
 		}, 300);
-		// var i = 0;
-		// var n = this.undos.length;
-		// this.strokes = [];
-		// this.strokes.push(this.undos.pop());
-		// this.redraw();
-		// setInterval(function() { i++; if (i <= n) { 
-		// 	this.strokes.push(this.undos.pop());
-		// 	this.redraw(); } }, 1000);
+	};
+
+	/**
+	 * Play all points for showing the draw process
+	 */
+	Sketchpad.prototype.playAll = function () {
+
+		while(this.strokes.length > 0)
+		{
+			this.undos.push(this.strokes.pop());
+		}
+
+		var that = this;
+
+		var n = that.undos.length;
+		var i = 0;
+		that.redo_all();
+
+		while (i <= n)
+		{
+			that.redo_all();
+			i++;
+		}
 	};
 
 
@@ -379,6 +463,18 @@
 
 		this.strokes.push(this.undos.pop());
 		this.redraw();
+	};
+
+		/**
+	 * Redo the last undo action
+	 */
+	Sketchpad.prototype.redo_all = function () {
+		if (this.undos.length === 0) {
+			return;
+		}
+
+		this.strokes.push(this.undos.pop());
+		this.redraw_detail();
 	};
 
 
