@@ -72,6 +72,10 @@
 			that.redo();
 		}
 
+		function play() {
+			that.play();
+		}
+
 		function addToolbar () {
 			var toolbar = document.createElement('div');
 			toolbar.style.width = '100%';
@@ -79,6 +83,7 @@
 			toolbar.style.marginBottom = '10px';
 			toolbar.appendChild(addButton('undo'));
 			toolbar.appendChild(addButton('redo'));
+			toolbar.appendChild(addButton('play'));
 			el.appendChild(toolbar);
 		}
 
@@ -91,12 +96,15 @@
 
 			button.onclick = function() {
 				switch(event) {
-			    case "undo":
+			    case 'undo':
 		        undo();
 		        break;
-			    case "redo":
+			    case 'redo':
 		        redo();
 		        break;
+		      case 'play':
+		      	play();
+		      	break;
 				}
 			}
 			button.setAttribute('class', 'btn btn-primary');
@@ -321,6 +329,43 @@
 
 		this.undos.push(this.strokes.pop());
 		this.redraw();
+	};
+
+
+	/**
+	 * Play for showing the draw process
+	 */
+	Sketchpad.prototype.play = function () {
+		// if (this.strokes.length === 0){
+		// 	return;
+		// }
+
+		while(this.strokes.length > 0)
+		{
+			console.log(this.strokes);
+			this.undos.push(this.strokes.pop());
+		}
+
+		var that = this;
+
+		var n = that.undos.length;
+		var i = 1;
+		that.redo();
+		setInterval(function() {
+			if (i <= n)
+			{
+				that.redo();
+				i++;
+			} 
+		}, 300);
+		// var i = 0;
+		// var n = this.undos.length;
+		// this.strokes = [];
+		// this.strokes.push(this.undos.pop());
+		// this.redraw();
+		// setInterval(function() { i++; if (i <= n) { 
+		// 	this.strokes.push(this.undos.pop());
+		// 	this.redraw(); } }, 1000);
 	};
 
 
