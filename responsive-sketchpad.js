@@ -34,12 +34,6 @@
 		// tools.playAll = tools.playAll || false;
 
 		opts = opts || {};
-
-		console.log(el.clientWidth);
-		if(el.clientWidth === 0)
-		{
-			console.log(el);
-		}
 		opts.aspectRatio = opts.aspectRatio || 1;
 		opts.width = opts.width || el.clientWidth-20;
 		//var height = ((opts.width * opts.aspectRatio) < maxHeight ? opts.width * opts.aspectRatio : maxHeight);
