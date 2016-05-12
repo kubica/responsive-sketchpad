@@ -20,21 +20,34 @@
 	}
 
 
-	function Sketchpad(el, opts) {
+	function Sketchpad(el, opts, tools) {
 		var that = this;
 
 		if (!el) {
 			throw new Error('Must pass in a container element');
 		}
 
+		tools = tools || {};
+		// tools.undo = tools.undo || false;
+		// tools.redo = tools.redo || false;
+		// tools.play = tools.play || false;
+		// tools.playAll = tools.playAll || false;
+
 		opts = opts || {};
+
+		console.log(el.clientWidth);
+		if(el.clientWidth === 0)
+		{
+			console.log(el);
+		}
 		opts.aspectRatio = opts.aspectRatio || 1;
 		opts.width = opts.width || el.clientWidth-20;
 		//var height = ((opts.width * opts.aspectRatio) < maxHeight ? opts.width * opts.aspectRatio : maxHeight);
 		opts.height = opts.height || opts.width * opts.aspectRatio;
 		opts.data = opts.data || [];
+		opts.color = opts.color || '#000';
 		opts.line = mergeObjects({
-			color: '#000',
+			color: opts.color,
 			size: 5,
 			cap: 'round',
 			join: 'round',
@@ -59,7 +72,7 @@
 			canvas.style.width = width + 'px';
 			canvas.style.height = height + 'px';
 			canvas.style.padding = '0';
-			canvas.style.margin = 'auto';
+			canvas.style.margin = '0 auto';
 			canvas.style.display = 'block';
 			canvas.style.border = '1px solid #ddd';
 		}
@@ -80,16 +93,18 @@
 			that.playAll();
 		}
 
-		function addToolbar () {
+		function addToolbar (buttonsForTools) {
 			var toolbar = document.createElement('div');
 			toolbar.style.width = '100%';
 			toolbar.style.textAlign = 'center';
 			toolbar.style.marginBottom = '10px';
-			toolbar.appendChild(addButton('undo'));
-			toolbar.appendChild(addButton('redo'));
-			toolbar.appendChild(addButton('play'));
-			toolbar.appendChild(addButton('playAll'));
-			el.appendChild(toolbar);
+			if (buttonsForTools.undo) toolbar.appendChild(addButton('undo'));
+			if (buttonsForTools.redo) toolbar.appendChild(addButton('redo'));
+			if (buttonsForTools.play) toolbar.appendChild(addButton('play'));
+			if (buttonsForTools.playAll) toolbar.appendChild(addButton('playAll'));
+			if(buttonsForTools.undo || buttonsForTools.redo || buttonsForTools.play || buttonsForTools.playAll) {
+				el.appendChild(toolbar);
+			}
 		}
 
 		/**
@@ -117,6 +132,8 @@
 			}
 			button.setAttribute('class', 'btn btn-primary');
 			button.style.margin = '5px';
+			button.style.padding = '5px 10px';
+			button.style.fontSize = '16px';
 			button.innerHTML = event;
 
 			return button;
@@ -132,7 +149,7 @@
 			};
 		}
 
-		addToolbar();
+		addToolbar(tools);
 		setCanvasSize(opts.width, opts.height);
 		el.appendChild(canvas);
 		var context = canvas.getContext('2d');
@@ -267,7 +284,8 @@
 
 								context.closePath();
 								context.strokeStyle = stroke.color;
-								context.lineWidth = normalizeLineSize(stroke.size);
+								// 90% as a workaround for beginPath/endPath multiple
+								context.lineWidth = normalizeLineSize(stroke.size * 90/100);
 								context.lineJoin = stroke.join;
 								context.lineCap = stroke.cap;
 								context.miterLimit = stroke.miterLimit;
@@ -365,16 +383,19 @@
 			that.redraw();
 		}
 
-		// Event Listeners
-		canvas.addEventListener('mousedown', startLine);
-		canvas.addEventListener('touchstart', startLine);
+		if(opts.drawing)
+		{
+			// Event Listeners
+			canvas.addEventListener('mousedown', startLine);
+			canvas.addEventListener('touchstart', startLine);
 
-		canvas.addEventListener('mousemove', drawLine);
-		canvas.addEventListener('touchmove', drawLine);
+			canvas.addEventListener('mousemove', drawLine);
+			canvas.addEventListener('touchmove', drawLine);
 
-		canvas.addEventListener('mouseup', endLine);
-		canvas.addEventListener('mouseleave', endLine);
-		canvas.addEventListener('touchend', endLine);
+			canvas.addEventListener('mouseup', endLine);
+			canvas.addEventListener('mouseleave', endLine);
+			canvas.addEventListener('touchend', endLine);
+		}
 
 		// Public variables
 		this.canvas = canvas;
