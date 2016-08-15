@@ -34,10 +34,16 @@
 		// tools.playAll = tools.playAll || false;
 
 		opts = opts || {};
+
+		console.log(el.clientWidth);
+		if(el.clientWidth === 0)
+		{
+			console.log(el);
+		}
 		opts.aspectRatio = opts.aspectRatio || 1;
 		opts.width = opts.width || el.clientWidth-20;
 		//var height = ((opts.width * opts.aspectRatio) < maxHeight ? opts.width * opts.aspectRatio : maxHeight);
-		opts.height = opts.height || opts.width * opts.aspectRatio;
+		opts.height = opts.height || opts.width/opts.aspectRatio;
 		opts.data = opts.data || [];
 		opts.color = opts.color || '#000';
 		opts.line = mergeObjects({
@@ -87,6 +93,10 @@
 			that.playAll();
 		}
 
+		function share() {
+			that.share();
+		}
+
 		function addToolbar (buttonsForTools) {
 			var toolbar = document.createElement('div');
 			toolbar.style.width = '100%';
@@ -96,6 +106,7 @@
 			if (buttonsForTools.redo) toolbar.appendChild(addButton('redo'));
 			if (buttonsForTools.play) toolbar.appendChild(addButton('play'));
 			if (buttonsForTools.playAll) toolbar.appendChild(addButton('playAll'));
+			if (buttonsForTools.share) toolbar.appendChild(addButton('share'));
 			if(buttonsForTools.undo || buttonsForTools.redo || buttonsForTools.play || buttonsForTools.playAll) {
 				el.appendChild(toolbar);
 			}
@@ -122,8 +133,12 @@
 		      case 'playAll':
 		      	playAll();
 		      	break;
+		      case 'share':
+		      	share();
+		      	break;
 				}
 			}
+			button.setAttribute('id', event);
 			button.setAttribute('class', 'btn btn-primary');
 			button.style.margin = '5px';
 			button.style.padding = '5px 10px';
@@ -246,6 +261,8 @@
 			context.stroke();
 		}
 
+		var pointsCounter = 0;
+
 		/**
 		 * Draw a stroke on the canvas
 		 */
@@ -254,47 +271,78 @@
 			var n = points.length - 1;	// 4 - 2,2
 			var j=0;
 
-			setInterval(function() {
+			var refreshIntervalId = setInterval(function() {
 				if (j < n)
 				{
-					var t=0;
-					for(var s=0; s<strokes.length; s++)
+					if(replay) 
 					{
-						// get current stroke
-						var stroke = strokes[s];
-						t += stroke.points.length;
-
-						if(j < t)
+						var t=0;
+						for(var s=0; s<strokes.length; s++)
 						{
-							if(j+1 !== t)
+							// get current stroke
+							var stroke = strokes[s];
+							t += stroke.points.length;
+
+							if(j < t)
 							{
-								context.beginPath();
+								if(j+1 !== t)
+								{
+									context.beginPath();
 
-								var start = normalizePoint(points[j]);
-								var end = normalizePoint(points[j + 1]);
+									var start = normalizePoint(points[j]);
+									var end = normalizePoint(points[j + 1]);
 
-								context.moveTo(start.x, start.y);
-								context.lineTo(end.x, end.y);
+									context.moveTo(start.x, start.y);
+									context.lineTo(end.x, end.y);
 
-								context.closePath();
-								context.strokeStyle = stroke.color;
-								// 90% as a workaround for beginPath/endPath multiple
-								context.lineWidth = normalizeLineSize(stroke.size * 90/100);
-								context.lineJoin = stroke.join;
-								context.lineCap = stroke.cap;
-								context.miterLimit = stroke.miterLimit;
+									context.closePath();
+									context.strokeStyle = stroke.color;
+									// 90% as a workaround for beginPath/endPath multiple
+									context.lineWidth = normalizeLineSize(stroke.size * 90/100);
+									context.lineJoin = stroke.join;
+									context.lineCap = stroke.cap;
+									context.miterLimit = stroke.miterLimit;
 
-								context.stroke();
-							}
+									context.stroke();
+								}
 
-							break;
-						}					
+								break;
+							}					
+						}
+						j++;
 					}
-
-					j++;
+					else {
+						// last known position
+						pointsCounter += j;
+						stopDrawing(pointsCounter);
+						clearInterval(refreshIntervalId);
+						//redraw();
+					}
+				}
+				else {
+					pointsCounter += n;
+					clearInterval(refreshIntervalId);
 				}
 			}, 50);
 		}
+
+		function stopDrawing(pointsCount) {
+			var counter = 0;
+
+			for(var i=0; i<that.strokes.length; i++) {
+				if(counter < pointsCount) {
+					counter += that.strokes[i].points.length;
+					if(counter > pointsCount) {
+						that.strokes[i].points = that.strokes[i].points.slice(0,(pointsCount - (counter - that.strokes[i].points.length)));
+					}
+				}
+				else {
+					that.strokes[i].points = [];
+				}
+			}
+			redraw();
+		}
+
 
 		/**
 		 * Redraw the canvas
@@ -444,26 +492,50 @@
 		}, 300);
 	};
 
+	var replay = false;
+
+	Sketchpad.prototype.share = function () {
+		$('#graphicsFromStudents').modal('hide');
+		$('#resultChart').modal('hide');
+		$('#successShare').show('slow');
+		setTimeout(hideSuccess, 7000);
+	};
+
+	function hideSuccess(){
+	  $('#successShare').hide('slow');
+	}
+
 	/**
 	 * Play all points for showing the draw process
 	 */
 	Sketchpad.prototype.playAll = function () {
 
-		while(this.strokes.length > 0)
-		{
-			this.undos.push(this.strokes.pop());
+		if(replay) {
+			replay = false;
+			//el.getElementById("playAll").innerHTML = "Angehalten";
+		}
+		else {
+			replay = true;
+			//el.getElementById("playAll").innerHTML = "Stop";
 		}
 
-		var that = this;
+		if(replay) {
+			while(this.strokes.length > 0)
+			{
+				this.undos.push(this.strokes.pop());
+			}
 
-		var n = that.undos.length;
-		var i = 0;
-		that.redo_all();
+			var that = this;
 
-		while (i <= n)
-		{
+			var n = that.undos.length;
+			var i = 0;
 			that.redo_all();
-			i++;
+
+			while (i <= n )
+			{
+				that.redo_all();
+				i++;
+			}
 		}
 	};
 
