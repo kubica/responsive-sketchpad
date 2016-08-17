@@ -87,10 +87,16 @@
 
 		function undo() {
 			that.undo();
+			for(var i=0;i<document.getElementsByClassName('play').length;i++){
+				document.getElementsByClassName('play')[i].disabled = false;
+			}
 		}
 
 		function redo() {
 			that.redo();
+			for(var i=0;i<document.getElementsByClassName('play').length;i++){
+				document.getElementsByClassName('play')[i].disabled = false;
+			}
 		}
 
 		function play() {
