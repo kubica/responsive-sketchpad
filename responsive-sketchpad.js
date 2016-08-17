@@ -78,9 +78,9 @@
 			if(opts.drawing)
 			{
 				if(opts.color && opts.color === 'red') {
-					canvas.style.cursor = 'url(images/pencil_red.png),url(images/pencil_red.cur),auto';
+					canvas.style.cursor = 'url("http://ani.cursors-4u.net/others/images9/oth845.png"),url("http://ani.cursors-4u.net/others/oth-9/oth845.cur"),auto';
 				} else {
-					canvas.style.cursor = 'url(images/pencil.png),url(images/pencil.cur),auto';
+					canvas.style.cursor = 'url("http://ani.cursors-4u.net/others/images9/oth838.png"),url("http://ani.cursors-4u.net/others/oth-9/oth838.cur"),auto';
 				}
 			}
 		}
