@@ -35,10 +35,10 @@
 
 		opts = opts || {};
 
-		console.log(el.clientWidth);
+		//console.log(el.clientWidth);
 		if(el.clientWidth === 0)
 		{
-			console.log(el);
+			//console.log(el);
 		}
 		opts.aspectRatio = opts.aspectRatio || 1;
 		opts.width = opts.width || el.clientWidth-20;
@@ -74,7 +74,15 @@
 			canvas.style.padding = '0';
 			canvas.style.margin = '0 auto';
 			canvas.style.display = 'block';
-			canvas.style.border = '1px solid #ddd';
+			canvas.style.border = '1px solid #ACB1B0';
+			if(opts.drawing)
+			{
+				if(opts.color && opts.color === 'red') {
+					canvas.style.cursor = 'url(images/pencil_red.png),url(images/pencil_red.cur),auto';
+				} else {
+					canvas.style.cursor = 'url(images/pencil.png),url(images/pencil.cur),auto';
+				}
+			}
 		}
 
 		function undo() {
@@ -102,10 +110,10 @@
 			toolbar.style.width = '100%';
 			toolbar.style.textAlign = 'center';
 			toolbar.style.marginBottom = '10px';
-			if (buttonsForTools.undo) toolbar.appendChild(addButton('undo'));
-			if (buttonsForTools.redo) toolbar.appendChild(addButton('redo'));
 			if (buttonsForTools.play) toolbar.appendChild(addButton('play'));
 			if (buttonsForTools.playAll) toolbar.appendChild(addButton('playAll'));
+			if (buttonsForTools.undo) toolbar.appendChild(addButton('undo'));
+			if (buttonsForTools.redo) toolbar.appendChild(addButton('redo'));
 			if (buttonsForTools.share) toolbar.appendChild(addButton('share'));
 			if(buttonsForTools.undo || buttonsForTools.redo || buttonsForTools.play || buttonsForTools.playAll) {
 				el.appendChild(toolbar);
@@ -121,21 +129,21 @@
 
 			button.onclick = function() {
 				switch(event) {
-			    case 'undo':
-		        undo();
-		        break;
-			    case 'redo':
-		        redo();
-		        break;
-		      case 'play':
-		      	play();
-		      	break;
-		      case 'playAll':
-		      	playAll();
-		      	break;
-		      case 'share':
-		      	share();
-		      	break;
+					case 'undo':
+						undo();
+						break;
+					case 'redo':
+						redo();
+						break;
+					case 'play':
+						play();
+						break;
+					case 'playAll':
+						playAll();
+						break;
+					case 'share':
+						share();
+						break;
 				}
 			}
 			button.setAttribute('id', event);
@@ -143,7 +151,23 @@
 			button.style.margin = '5px';
 			button.style.padding = '5px 10px';
 			button.style.fontSize = '16px';
-			button.innerHTML = event;
+			if(event === 'undo') {
+				button.innerHTML = '<i class="fa fa-undo"></i> Undo';
+			}
+			else if(event === 'redo') {
+				button.innerHTML = '<i class="fa fa-repeat"></i> Redo';
+			}
+			else if(event === 'playAll') {
+				button.innerHTML = '<i class="fa fa-play"></i> Abspielen';
+				button.setAttribute('class', 'btn btn-primary play');
+			}
+			else if(event === 'share') {
+				button.innerHTML = '<i class="fa fa-share-alt"></i> Freigeben';
+			}
+			else
+			{
+				button.innerHTML = event;
+			}
 
 			return button;
 		}
@@ -262,6 +286,8 @@
 		}
 
 		var pointsCounter = 0;
+		var onlyOnes = false;
+		var currentCounter = 0;
 
 		/**
 		 * Draw a stroke on the canvas
@@ -272,6 +298,7 @@
 			var j=0;
 
 			var refreshIntervalId = setInterval(function() {
+
 				if (j < n)
 				{
 					if(replay) 
@@ -312,34 +339,102 @@
 						j++;
 					}
 					else {
+						console.log("test");
 						// last known position
-						pointsCounter += j;
-						stopDrawing(pointsCounter);
-						clearInterval(refreshIntervalId);
+						while(refreshIntervalId)
+						if(!onlyOnes)
+						{
+							onlyOnes = true;
+							pointsCounter = j;
+							console.log("again new pointsCounter"+pointsCounter);
+							stopDrawing(pointsCounter);
+							clearInterval(refreshIntervalId);
+						}
+						j=n;
 						//redraw();
 					}
 				}
 				else {
-					pointsCounter += n;
+					// all iterated
+					//pointsCounter += n;
+					// if(!onlyOnes)
+					// {
+					// 	onlyOnes = true;
+					// 	for(var i=0;i<document.getElementsByClassName('play').length;i++){
+					// 		document.getElementsByClassName('play')[i].disabled = false;
+					// 	}
+					// }
+
+					pointsCounter += 1;
+					if(pointsCounter === strokes.length) {
+						for(var i=0;i<document.getElementsByClassName('play').length;i++){
+							document.getElementsByClassName('play')[i].disabled = false;
+						}
+					}
+					console.log("new pointsCounter"+pointsCounter);
 					clearInterval(refreshIntervalId);
+					currentCounter = 0;
 				}
-			}, 50);
+			}, 20);
 		}
 
-		function stopDrawing(pointsCount) {
-			var counter = 0;
 
-			for(var i=0; i<that.strokes.length; i++) {
-				if(counter < pointsCount) {
-					counter += that.strokes[i].points.length;
-					if(counter > pointsCount) {
-						that.strokes[i].points = that.strokes[i].points.slice(0,(pointsCount - (counter - that.strokes[i].points.length)));
-					}
+		function stopDrawing(pointsCount) {
+
+			var n = pointsCount;
+			var j=0;
+
+			if (j < n)
+			{
+				var t=0;
+				for(var s=0; s<strokes.length; s++)
+				{
+					// get current stroke
+					var stroke = that.strokes[s];
+					t += stroke.points.length;
+
+					if(j < t)
+					{
+						if(j+1 !== t)
+						{
+							context.beginPath();
+
+							var start = normalizePoint(points[j]);
+							var end = normalizePoint(points[j + 1]);
+
+							context.moveTo(start.x, start.y);
+							context.lineTo(end.x, end.y);
+
+							context.closePath();
+							context.strokeStyle = stroke.color;
+							// 90% as a workaround for beginPath/endPath multiple
+							context.lineWidth = normalizeLineSize(stroke.size * 90/100);
+							context.lineJoin = stroke.join;
+							context.lineCap = stroke.cap;
+							context.miterLimit = stroke.miterLimit;
+
+							context.stroke();
+						}
+
+						break;
+					}					
 				}
-				else {
-					that.strokes[i].points = [];
-				}
+				j++;
 			}
+
+			// for(var i=0; i<that.strokes.length; i++) {
+			// 	console.log("step "+i);
+			// 	if(counter < pointsCount) {
+			// 		counter += that.strokes[i].points.length;
+			// 		console.log("new Counter: "+pointsCount);
+			// 		if(counter > pointsCount) {
+			// 			that.strokes[i].points = that.strokes[i].points.slice(0,(pointsCount - (counter - that.strokes[i].points.length)));
+			// 		}
+			// 	}
+			// 	else {
+			// 		that.strokes[i].points = [];
+			// 	}
+			// }
 			redraw();
 		}
 
@@ -495,14 +590,13 @@
 	var replay = false;
 
 	Sketchpad.prototype.share = function () {
-		$('#graphicsFromStudents').modal('hide');
 		$('#resultChart').modal('hide');
 		$('#successShare').show('slow');
-		setTimeout(hideSuccess, 7000);
+		setTimeout(hideSuccess, 10000);
 	};
 
 	function hideSuccess(){
-	  $('#successShare').hide('slow');
+		$('#successShare').hide('slow');
 	}
 
 	/**
@@ -510,14 +604,17 @@
 	 */
 	Sketchpad.prototype.playAll = function () {
 
-		if(replay) {
-			replay = false;
+		// if(replay) {
+		// 	replay = false;
 			//el.getElementById("playAll").innerHTML = "Angehalten";
+		// }
+		// else {
+		replay = true;
+		for(var i=0;i<document.getElementsByClassName('play').length;i++){
+			document.getElementsByClassName('play')[i].disabled = true;
 		}
-		else {
-			replay = true;
-			//el.getElementById("playAll").innerHTML = "Stop";
-		}
+		//el.getElementById("playAll").innerHTML = "Stop";
+		// }
 
 		if(replay) {
 			while(this.strokes.length > 0)
