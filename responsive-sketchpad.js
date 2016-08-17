@@ -84,6 +84,7 @@
 				}
 			}
 		}
+		
 
 		function undo() {
 			that.undo();
