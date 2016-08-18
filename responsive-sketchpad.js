@@ -78,13 +78,13 @@
 			if(opts.drawing)
 			{
 				if(opts.color && opts.color === 'red') {
-					canvas.style.cursor = 'url("http://ani.cursors-4u.net/others/images9/oth845.png"),url("http://ani.cursors-4u.net/others/oth-9/oth845.cur"),auto';
+					canvas.style.cursor = 'url("http://fs5.directupload.net/images/160818/n9oseuyz.png"),url("http://ani.cursors-4u.net/others/oth-9/oth845.cur"),auto';
 				} else {
-					canvas.style.cursor = 'url("http://ani.cursors-4u.net/others/images9/oth838.png"),url("http://ani.cursors-4u.net/others/oth-9/oth838.cur"),auto';
+					canvas.style.cursor = 'url("http://fs5.directupload.net/images/160818/7j7a32es.png"),url("http://ani.cursors-4u.net/others/oth-9/oth838.cur"),auto';
 				}
 			}
 		}
-		
+
 
 		function undo() {
 			that.undo();
